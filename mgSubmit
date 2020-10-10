@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#
+# This program is part of the Mini Grid system.  It allows nicer
+# submission of jobs
+#
+
+# use the same socket that the server will listen on
+SERVER_FIFO="/tmp/server-${USER}-fifo"
+
+# First, handle the '-x' and '-s' options -- if they are present,
+# then send the appropriate command and then exit
+
+
+# Now, take the command line we have been given and
+# send it to the server
+
