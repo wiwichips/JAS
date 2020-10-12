@@ -1,0 +1,25 @@
+#!/bin/bash
+
+fifoRead=$1
+fifoOutput=$2
+ID=$3
+
+# functions
+function executeCommand {
+  bash -c $1 >> processor-$USER.${ID}.log
+}
+
+function sendStatus {
+  # send the status
+  echo sendStatus
+}
+
+
+# each time a line is passed by the fifo, execute the task
+line=$fifoRead # change this later
+
+if [ "$fifoName" = "exit" ]; then
+    exit
+fi
+
+executeCommand $line
