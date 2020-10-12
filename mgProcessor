@@ -1,8 +1,8 @@
 #!/bin/bash
 
-fifoRead=$1
-fifoOutput=$2
-ID=$3
+ID=$1
+FIFO_P="/tmp/processor-${USER}-fifo"
+
 
 # functions
 function executeCommand {
@@ -14,12 +14,31 @@ function sendStatus {
   echo sendStatus
 }
 
+function processInput {
+  line=$1
 
-# each time a line is passed by the fifo, execute the task
-line=$fifoRead # change this later
+  echo $line
 
-if [ "$fifoName" = "exit" ]; then
+  # if exit is passed, kill the processor
+  if [ "$line" = "exit" ]; then
     exit
-fi
+  fi
 
-executeCommand $line
+  # compare the first word in line
+  if [[ "$(echo $line | cut -f 1 -d " ")" == "$ID" ]]; then
+    # if the first word is the cpuID, then remove that word and use it
+    line=$(echo $line | cut -f 2- -d " ")
+
+    # execute the command sent
+    # executeCommand "$line"
+    echo $line
+  fi
+}
+
+# read input from the process fifo
+{
+  while read line
+  do
+    processInput "$line"
+  done
+} < $FIFO_P

@@ -6,10 +6,10 @@ FIFO_P="/tmp/processor-${USER}-fifo"
 
 # calculate default number of processors
 numCPU=$(getconf _NPROCESSORS_ONLN) # tested on MAC OS
-echo $numCPU
 
 # process command line options (so that number of processors can be overridden)
 PRINT_HELP="NO"
+# check for the flags and options passed
 for arg in "$@"
 do
 	case "${arg}" in
@@ -38,3 +38,19 @@ then
     exit -1
 fi
 
+#
+# create the fifos (numCPU * 2 + 1 in total)
+#
+
+# create the server fifo and processor fifo
+mkfifo $FIFO_S
+mkfifo $FIFO_P
+
+# start running processors depending on the number of processors
+for i in $(seq $numCPU)
+do
+	
+done
+
+# call scheduler script
+./scheduler.bash $numCPU
