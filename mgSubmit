@@ -10,27 +10,16 @@ SERVER_FIFO="/tmp/server-${USER}-fifo"
 
 # First, handle the '-x' and '-s' options -- if they are present,
 # then send the appropriate command and then exit
-
+input=$1
+if [ X"$input" = X"-x" ]
+then
+	input="exit"
+elif [ X"$input" = X"-s" ]
+then
+	input="status"
+fi
 
 # Now, take the command line we have been given and
 # send it to the server
 
-FIFO_P="/tmp/processor-${USER}-fifo"
-
-# set cleanup
-trap "rm -f $FIFO_P; exit 0" 0 1 2 15
-
-if
-	mkfifo $FIFO_P
-then
-	echo "Successfully created FIFO (named pipe) $FIFO_P"
-else
-	echo "Error: Failed creating FIFO $FIFO_P"
-fi
-
-{
-	# send the filename on the first line
-	echo $1
-	# send the file contents
-	cat $1 > $FIFO_P
-} > $FIFO_P
+echo $1 > $SERVER_FIFO

@@ -5,7 +5,7 @@ FIFO_S="/tmp/server-${USER}-fifo"
 FIFO_P="/tmp/processor-${USER}-fifo"
 
 # calculate default number of processors
-numCPU=$(getconf _NPROCESSORS_ONLN) # tested on MAC OS
+numCPU=$(getconf _NPROCESSORS_ONLN)
 
 # process command line options (so that number of processors can be overridden)
 PRINT_HELP="NO"
@@ -38,19 +38,17 @@ then
     exit -1
 fi
 
-#
-# create the fifos (numCPU * 2 + 1 in total)
-#
-
-# create the server fifo and processor fifo
+# make the server fifo
 mkfifo $FIFO_S
-mkfifo $FIFO_P
+trap "rm -f $FIFO_S; exit 0" 0 1 2 15
 
-# start running processors depending on the number of processors
-for i in $(seq $numCPU)
+# read from the server fifo
+while read line < $FIFO_S
 do
-	
-done
+	if [ "$line" = 'exit' ]
+	then
+		break
+	fi
 
-# call scheduler script
-./scheduler.bash $numCPU
+	echo "$line"
+done
