@@ -3,42 +3,36 @@
 ID=$1
 FIFO_P="/tmp/processor-${USER}-fifo"
 
-
+#
 # functions
-function executeCommand {
-  bash -c $1 >> processor-$USER.${ID}.log
-}
+#
 
 function sendStatus {
-  # send the status
-  echo sendStatus
+  echo $ID
+}
+
+function executeCommand {
+  # bash -c $1 >> processor-$USER.${ID}.log
+  bash -c $1
 }
 
 function processInput {
   line=$1
 
-  echo $line
-
-  # if exit is passed, kill the processor
-  if [ "$line" = "exit" ]; then
-    exit
-  fi
-
-  # compare the first word in line
-  if [[ "$(echo $line | cut -f 1 -d " ")" == "$ID" ]]; then
-    # if the first word is the cpuID, then remove that word and use it
-    line=$(echo $line | cut -f 2- -d " ")
-
-    # execute the command sent
-    # executeCommand "$line"
-    echo $line
-  fi
+  # execute the line
+  executeCommand "$line"
 }
 
-# read input from the process fifo
-{
-  while read line
-  do
-    processInput "$line"
-  done
-} < $FIFO_P
+#
+# main
+#
+
+while read line < $FIFO_P
+do
+	if [ "$line" = 'exit' ]
+	then
+		break
+	fi
+
+	processInput "$line"
+done

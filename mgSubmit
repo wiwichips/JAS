@@ -22,4 +22,4 @@ fi
 # Now, take the command line we have been given and
 # send it to the server
 
-echo $1 > $SERVER_FIFO
+echo $input > $SERVER_FIFO
