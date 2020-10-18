@@ -1,11 +1,54 @@
-#!/bin/sh
+#!/bin/bash
 
+#
 # set up some globals
+#
+
+# pipe names
 FIFO_S="/tmp/server-${USER}-fifo"
 FIFO_P="/tmp/processor-${USER}-fifo"
 
 # calculate default number of processors
 numCPU=$(getconf _NPROCESSORS_ONLN)
+
+# array of cpubusyness
+idle=() # 1 repreesents idle, 0 represents busy
+jobQueue=()
+jobInd=0
+
+#
+# functions
+#
+
+function addToQ {
+	job=$1
+	jobQueue+=($job)
+}
+
+# this function is called when a CPU is ready to be used
+function scheduleJob {
+	# pop from the job queue
+	job=$jobQueue[jobInd]
+	jobInd+=1
+	
+	# assign the job to the first free CPU
+	for i in "${idle[@]}"
+	do
+		if [ "${idle[3i]}" == "1" ]; then
+    	idle[$i]=
+		fi
+	done
+}
+
+function initIdleArray {
+	# fill the array with as many 1s as there are CPUS in the computer
+	for i in $(seq $numCPU)
+	do
+		idle+=(1)
+	done
+}
+
+
 
 # process command line options (so that number of processors can be overridden)
 PRINT_HELP="NO"
@@ -38,6 +81,9 @@ then
     exit -1
 fi
 
+# initialize the array of idle cpu data
+initIdleArray
+
 # make the server fifo
 mkfifo $FIFO_S
 trap "rm -f $FIFO_S; exit 0" 0 1 2 15
@@ -50,5 +96,6 @@ do
 		break
 	fi
 
-	echo "$line"
+	# schedule the job
+	addToQ "$line"
 done
