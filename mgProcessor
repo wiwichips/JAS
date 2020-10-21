@@ -1,19 +1,34 @@
 #!/bin/bash
 
 ID=$1
-FIFO_P="/tmp/processor-${USER}-fifo"
+FIFO_P="/tmp/processor-${ID}-${USER}-fifo"
+FIFO_P_STATUS="/tmp/processor-${ID}-status-${USER}-fifo"
+
+#
+# global variables
+#
+
+idle=0
 
 #
 # functions
 #
 
+function makeIdle {
+  idle=0
+}
+
+function makeBusy {
+  idle=1
+}
+
 function sendStatus {
-  echo $ID
+  # output on the fifo to the server ONLY when signaled by the server
+  echo $idle > FIFO_P_STATUS
 }
 
 function executeCommand {
-  # bash -c $1 >> processor-$USER.${ID}.log
-  bash -c $1
+  ./runProc $$ $1 &
 }
 
 function processInput {
@@ -24,9 +39,20 @@ function processInput {
 }
 
 #
+# traps
+#
+
+# this tells the processor it is done running a job
+trap makeIdle SIGUSR2
+
+# this is for sending the status to the server
+trap sendStatus SIGUSR1
+
+#
 # main
 #
 
+# read every line from the fifo - sever will only send a line when idle
 while read line < $FIFO_P
 do
 	if [ "$line" = 'exit' ]

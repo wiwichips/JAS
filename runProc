@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# first argument is pid of calling process,
+pid=$1
+
+# second argument is the command to be run
+cmd=$2
+
+# run the comamnd
+$cmd
+
+# send a signal to the calling process that it has completed its operation
+kill -12 $pid
+
