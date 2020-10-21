@@ -33,6 +33,9 @@ function executeCommand {
 
 function processInput {
   line=$1
+  
+  # set the processor to busy
+  makeBusy
 
   # execute the line
   executeCommand "$line"
