@@ -58,6 +58,15 @@ function initIdleArray {
 
 }
 
+function updateIdle {
+	# read a line from each cpu
+	# for i in $(seq $numCPU)
+	# do
+	# 	read line < $FIFO_P-$i
+	break
+
+}
+
 # process command line options (so that number of processors can be overridden)
 PRINT_HELP="NO"
 # check for the flags and options passed
@@ -103,6 +112,7 @@ trap "rm -f $FIFO_S; exit 0" 0 1 2 15
 # READ OBE LIBE FROM THE PIPE AR A TIME FROM BOTH IN A LOOP --
 # READ ONE LINE FROM ONE PIPE, THEN ANOTHER LINE FROM THE NEXT
 # THEN LOOP
+# call the function updateIdle
 
 while read line < $FIFO_S
 do

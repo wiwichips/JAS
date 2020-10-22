@@ -1,30 +1,36 @@
 #!/bin/bash
 
-ID=$1
-FIFO_P="/tmp/processor-${ID}-${USER}-fifo"
-FIFO_P_STATUS="/tmp/processor-${ID}-status-${USER}-fifo"
-
 #
 # global variables
 #
 
-idle=0
+ID=$1
+serverPID=$2
+
+FIFO_P="/tmp/processor-${ID}-${USER}-fifo"
+FIFO_P_STATUS="/tmp/processor-${ID}-status-${USER}-fifo"
+
+idle=1
 
 #
 # functions
 #
 
 function makeIdle {
-  idle=0
+  idle=1
+  kill -12 $serverPID
 }
 
 function makeBusy {
-  idle=1
+  idle=0
 }
 
 function sendStatus {
   # output on the fifo to the server ONLY when signaled by the server
-  echo $idle > FIFO_P_STATUS
+  echo $idle > $FIFO_P_STATUS &
+
+  # let the server know that its ready 
+  kill -10 $serverPID
 }
 
 function executeCommand {
@@ -45,15 +51,18 @@ function processInput {
 # traps
 #
 
-# this tells the processor it is done running a job
+# runProc tells the processor the job is done
 trap makeIdle SIGUSR2
 
-# this is for sending the status to the server
+# this is for when the server requests the status of mgProcessor
 trap sendStatus SIGUSR1
 
 #
 # main
 #
+
+# write the PID to the status fifo to initialize the signal sending
+echo $$ > $FIFO_P_STATUS
 
 # read every line from the fifo - sever will only send a line when idle
 while read line < $FIFO_P
