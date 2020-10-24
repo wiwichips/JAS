@@ -1,0 +1,51 @@
+#!/bin/bash
+
+numCPU=8
+
+jobQueue=()
+numJobs=0
+
+function addToQ {
+	jobQueue+=($1)
+  numJobs=$((numJobs+1))
+}
+
+function popQ {
+  newArray=()
+  for i in $(seq $((numJobs - 1)))
+	do
+    newArray+=(${jobQueue[$i]})
+	done
+  unset jobQueue
+  jobQueue=(${newArray[@]})
+}
+
+
+# just for the example
+addToQ $1
+addToQ $2
+addToQ $3
+addToQ $4
+
+echo "${jobQueue[@]}"
+
+popQ
+
+echo "${jobQueue[@]}"
+
+popQ
+
+echo "${jobQueue[@]}"
+
+
+
+# echo $func_result
+
+# each time a line is read from the fifo >>>>
+
+# add it to the job queue
+
+# check if there are free CPUs
+#       send the job to the CPU
+
+# <<<<
