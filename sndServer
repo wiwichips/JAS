@@ -16,7 +16,8 @@ cpuPID=()
 jobQueue=()
 numJobs=0
 
-# job queue stuff
+# extra status info
+numDone=0
 
 # usage - addToQueue "job"
 function addToQ {
@@ -69,10 +70,15 @@ function assignJob {
 # only called when a job finished via a signal, checks all pids to see if they exist
 function updateIdle {
   local v=$1
+
+  if [ "$v" = 'v' ]
+  then
+    echo "There are $numCPU processors"
+    echo "$numDone jobs have been completed"
+  fi
+
   for i in $(seq $numCPU)
 	do
-    echo ${jobQueue[@]}
-
     if [ -n "${cpuPID[$i]}" -a -e /proc/${cpuPID[$i]} ]
     then
       if [ "$v" = 'v' ]; then echo "$i: busy"; fi
@@ -84,8 +90,13 @@ function updateIdle {
 	done
 }
 
+function updateTotal {
+  numDone=$((numDone+1))
+}
+
 # traps
-trap updateIdle SIGUSR1
+# trap "updateIdle; numDone=$((numDone+1))" SIGUSR1
+trap "updateIdle; updateTotal" SIGUSR1
 trap "rm -f $FIFO_S; exit 0" 0 1 2 15
 
 # set all cpus to idle (1)
