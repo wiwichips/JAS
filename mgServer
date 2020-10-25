@@ -54,8 +54,6 @@ function initIdleArray {
 	do
 		idle+=(1)
 	done
-
-
 }
 
 function updateIdle {
