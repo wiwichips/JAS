@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# parse command line
+cpuID=$1
+serverPID=$2
+
+# globals
+FIFO_P="/tmp/processor-${USER}-fifo-cpuID-${cpuID}"
+FIFO_DONE="/tmp/processor-${USER}-fifo-cpuID"
+
+echo "I am cpuID $cpuID, a child of $serverPID" > $FIFO_DONE &
+
+# send signal to server
+kill -10 $serverPID
+

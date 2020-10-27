@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# job pipe
+FIFO_S="/tmp/server-${USER}-fifo"
+FIFO_P="/tmp/processor-${USER}-fifo"
+FIFOS=()
+
+# cpu stuff
+numCPU=8
+idle=()
+
+# job queue
+jobQueue=()
+numJobs=0
+numDone=0
+
+# usage - addToQueue "job"
+function addToQ {
+	jobQueue+=($1)
+  numJobs=$((numJobs+1))
+}
+
+# usage - pass the array by name for first index, then pop
+function popQ {
+  if (( numJobs > 0 )); then
+    numJobs=$((numJobs - 1))
+    newArray=()
+    for j in $(seq $numJobs); do
+      newArray+=(${jobQueue[$j]})
+    done
+    unset jobQueue
+    jobQueue=(${newArray[@]})
+  fi
+}
+
+function updateTotal {
+  numDone=$((numDone+1))
+}
+
+function cleanup {
+  for i in $(seq $numCPU); do
+    rm -f ${FIFO_P}-cpuID${i}
+  done
+  rm -f $FIFO_S
+  rm -f "${FIFO_P}"
+  exit 0
+}
+
+function checkDone {
+  # read line < "${FIFO_P}done"
+
+  # echo $line
+  echo "done"
+}
+
+# create a fifo for sending status back to the server
+mkfifo "${FIFO_P}"
+mkfifo $FIFO_S
+
+# make required loop statements
+for i in $(seq $numCPU); do
+  # set each cpu to idle
+  idle[$i]=1
+
+  # create a new fifo
+  FIFOS[$i]="$FIFO_P$i"
+  mkfifo ${FIFO_P}-cpuID${i}
+done
+
+function assignJob {
+  if (( numJobs > 0 )); then # IF THERE'S AT LEAST ONE JOB IN THE JQ
+    for i in $(seq $numCPU); do
+      if [ "${idle[$i]}" = "1" ]; then
+        echo assign job to cpu $i
+        idle[$i]=0
+        popQ
+        break
+      fi
+    done
+  fi
+}
+
+# traps
+trap cleanup 0 1 2 15
+trap checkDone 10
+
+while true; do
+  # read user input from the submit pipe
+  submit="$(python3 fifoReader.py $FIFO_S)"
+  if [ "$submit" = 'exit' ]; then
+    break
+	
+  elif [ "$submit" = 'status' ]; then
+    echo "STATUS"
+    # status
+
+  elif [ "$submit" != "" ]; then
+    addToQ $submit
+    echo -e "~\t${jobQueue[@]}"
+  fi
+
+  # read from the done jobs queue
+  jobDone="$(python3 fifoReader.py $FIFO_P)"
+  if [ "$jobDone" != "" ]; then
+    echo -e "jd\t$jobDone"
+  fi
+
+  # assign any jobs to open processors if possible
+  assignJob
+done
