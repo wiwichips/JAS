@@ -53,6 +53,32 @@ function checkDone {
   echo "done"
 }
 
+function assignJob {
+  if (( numJobs > 0 )); then # IF THERE'S AT LEAST ONE JOB IN THE JQ
+    for i in $(seq $numCPU); do
+      if [ "${idle[$i]}" = "1" ]; then
+        echo assign job to cpu $i
+        idle[$i]=0
+        popQ
+        break
+      fi
+    done
+  fi
+}
+
+function status {
+  echo "There are $numCPU processors"
+  echo "$numDone jobs have been completed"
+  for i in $(seq $numCPU); do
+    if [ "${idle[$i]}" = "0" ]
+    then
+      printf "$i: busy\n"
+    else
+      printf "$i: idle\n"
+    fi
+	done
+}
+
 # create a fifo for sending status back to the server
 mkfifo "${FIFO_P}"
 mkfifo $FIFO_S
@@ -67,19 +93,6 @@ for i in $(seq $numCPU); do
   mkfifo ${FIFO_P}-cpuID${i}
 done
 
-function assignJob {
-  if (( numJobs > 0 )); then # IF THERE'S AT LEAST ONE JOB IN THE JQ
-    for i in $(seq $numCPU); do
-      if [ "${idle[$i]}" = "1" ]; then
-        echo assign job to cpu $i
-        idle[$i]=0
-        popQ
-        break
-      fi
-    done
-  fi
-}
-
 # traps
 trap cleanup 0 1 2 15
 trap checkDone 10
@@ -91,8 +104,7 @@ while true; do
     break
 	
   elif [ "$submit" = 'status' ]; then
-    echo "STATUS"
-    # status
+    status
 
   elif [ "$submit" != "" ]; then
     addToQ $submit
