@@ -10,10 +10,14 @@ FIFO_DONE="/tmp/processor-${USER}-fifo"
 
 function doJob {
   # execute the job
-  $1
+  $1 >> "/tmp/processor-$USER.${cpuID}.log"
 
-  # report back to the server thats its done
-  echo $cpuID > $FIFO_DONE
+  # report back to the server thats its done if the file exists
+  if test -f "$FIFO_DONE"; then
+    echo $cpuID > $FIFO_DONE
+  fi
+
+  
 }
 
 while read line < $FIFO_P; do
