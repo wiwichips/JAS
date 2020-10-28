@@ -1,6 +1,6 @@
 #!/bin/sh
 
-COUNT=10
+COUNT=5
 
 if [ $# -gt 0 ]
 then
