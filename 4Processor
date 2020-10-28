@@ -2,14 +2,26 @@
 
 # parse command line
 cpuID=$1
-serverPID=$2
+server=$2
 
 # globals
-FIFO_P="/tmp/processor-${USER}-fifo-cpuID-${cpuID}"
-FIFO_DONE="/tmp/processor-${USER}-fifo-cpuID"
+FIFO_P="/tmp/processor-${USER}-fifo-cpuID${cpuID}"
+FIFO_DONE="/tmp/processor-${USER}-fifo"
 
-echo "I am cpuID $cpuID, a child of $serverPID" > $FIFO_DONE &
+function doJob {
+  # execute the job
+  $1
 
-# send signal to server
-kill -10 $serverPID
+  # report back to the server thats its done
+  echo $cpuID > $FIFO_DONE
+}
 
+while read line < $FIFO_P; do
+  if [ "$line" = 'exit' ]; then
+      rm -f $FIFO_P
+      exit 0
+      break
+  fi
+    
+  doJob $line
+done

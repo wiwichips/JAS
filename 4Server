@@ -39,18 +39,19 @@ function updateTotal {
 
 function cleanup {
   for i in $(seq $numCPU); do
-    rm -f ${FIFO_P}-cpuID${i}
+    # rm -f ${FIFO_P}-cpuID${i}
+    echo "exit" > ${FIFO_P}-cpuID${i} &
   done
   rm -f $FIFO_S
   rm -f "${FIFO_P}"
   exit 0
 }
 
-function checkDone {
-  # read line < "${FIFO_P}done"
+function sendJob {
+  cpuID=$1
+  job=$2
 
-  # echo $line
-  echo "done"
+  echo "$job" > ${FIFO_P}-cpuID${1} &
 }
 
 function assignJob {
@@ -59,7 +60,9 @@ function assignJob {
       if [ "${idle[$i]}" = "1" ]; then
         echo assign job to cpu $i
         idle[$i]=0
+        job=$jobQueue
         popQ
+        sendJob $i $job
         break
       fi
     done
@@ -79,6 +82,11 @@ function status {
 	done
 }
 
+function clearCPU {
+  idle[$1]=1
+  updateTotal
+}
+
 # create a fifo for sending status back to the server
 mkfifo "${FIFO_P}"
 mkfifo $FIFO_S
@@ -91,16 +99,18 @@ for i in $(seq $numCPU); do
   # create a new fifo
   FIFOS[$i]="$FIFO_P$i"
   mkfifo ${FIFO_P}-cpuID${i}
+
+  ./4Processor $i $$ &
 done
 
 # traps
 trap cleanup 0 1 2 15
-trap checkDone 10
 
 while true; do
   # read user input from the submit pipe
   submit="$(python3 fifoReader.py $FIFO_S)"
   if [ "$submit" = 'exit' ]; then
+    exit 0
     break
 	
   elif [ "$submit" = 'status' ]; then
@@ -114,7 +124,7 @@ while true; do
   # read from the done jobs queue
   jobDone="$(python3 fifoReader.py $FIFO_P)"
   if [ "$jobDone" != "" ]; then
-    echo -e "jd\t$jobDone"
+    clearCPU $jobDone
   fi
 
   # assign any jobs to open processors if possible
