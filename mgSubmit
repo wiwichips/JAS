@@ -10,7 +10,7 @@ SERVER_FIFO="/tmp/server-${USER}-fifo"
 
 # First, handle the '-x' and '-s' options -- if they are present,
 # then send the appropriate command and then exit
-input=$1
+input=$@
 if [ X"$input" = X"-x" ]
 then
 	input="exit"
@@ -22,4 +22,4 @@ fi
 # Now, take the command line we have been given and
 # send it to the server
 
-echo $input > $SERVER_FIFO
+echo "${input}" > $SERVER_FIFO

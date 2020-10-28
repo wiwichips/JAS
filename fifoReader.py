@@ -19,7 +19,7 @@ except:
   exit(0)
 
 # get the readable, writable and exceptional lists from select
-RWE = select.select([fifo_s_fd], [], [], 0.01)
+RWE = select.select([fifo_s_fd], [], [], 0.001)
 
 if RWE[0]:
   for RWE_fd in RWE: 

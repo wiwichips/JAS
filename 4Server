@@ -6,7 +6,7 @@ FIFO_P="/tmp/processor-${USER}-fifo"
 FIFOS=()
 
 # cpu stuff
-numCPU=8
+numCPU="$(getconf _NPROCESSORS_ONLN)"
 idle=()
 
 # job queue
@@ -14,9 +14,12 @@ jobQueue=()
 numJobs=0
 numDone=0
 
+# used to shut down the loop when ^C
+isOn=1
+
 # usage - addToQueue "job"
 function addToQ {
-	jobQueue+=($1)
+	jobQueue+=("$@")
   numJobs=$((numJobs+1))
 }
 
@@ -38,19 +41,29 @@ function updateTotal {
 }
 
 function cleanup {
-  for i in $(seq $numCPU); do
-    # rm -f ${FIFO_P}-cpuID${i}
-    echo "exit" > ${FIFO_P}-cpuID${i} &
-  done
-  rm -f $FIFO_S
-  rm -f "${FIFO_P}"
+  if [ "$isOn" = '1' ]; then
+    # end the loop getting input
+    isOn=0
+    printf "Shutting down"
+    sleep 0.1
+    printf "."
+    sleep 0.2
+    printf "."
+    sleep 0.2
+    for i in $(seq $numCPU); do
+      # rm -f ${FIFO_P}-cpuID${i}
+      echo "exit" > ${FIFO_P}-cpuID${i} &
+    done
+    rm -f $FIFO_S
+    rm -f "${FIFO_P}"
+    printf ".\n"
+  fi
   exit 0
 }
 
 function sendJob {
   cpuID=$1
   job=$2
-
   echo "$job" > ${FIFO_P}-cpuID${1} &
 }
 
@@ -58,11 +71,11 @@ function assignJob {
   if (( numJobs > 0 )); then # IF THERE'S AT LEAST ONE JOB IN THE JQ
     for i in $(seq $numCPU); do
       if [ "${idle[$i]}" = "1" ]; then
-        echo assign job to cpu $i
+        # echo assign job to cpu $i
         idle[$i]=0
         job=$jobQueue
         popQ
-        sendJob $i $job
+        sendJob $i "$job"
         break
       fi
     done
@@ -88,6 +101,7 @@ function clearCPU {
 }
 
 # create a fifo for sending status back to the server
+umask 0077
 mkfifo "${FIFO_P}"
 mkfifo $FIFO_S
 
@@ -104,11 +118,11 @@ for i in $(seq $numCPU); do
 done
 
 # traps
-trap cleanup 0 1 2 15
+trap cleanup 0 1 2 15 SIGINT
 
-while true; do
+while [ "$isOn" = '1' ]; do
   # read user input from the submit pipe
-  submit="$(python3 fifoReader.py $FIFO_S)"
+  submit="$(python3 fifoReader.py $FIFO_S 2>/dev/null)"
   if [ "$submit" = 'exit' ]; then
     exit 0
     break
@@ -117,12 +131,11 @@ while true; do
     status
 
   elif [ "$submit" != "" ]; then
-    addToQ $submit
-    echo -e "~\t${jobQueue[@]}"
+    addToQ "${submit}"
   fi
 
   # read from the done jobs queue
-  jobDone="$(python3 fifoReader.py $FIFO_P)"
+  jobDone="$(python3 fifoReader.py $FIFO_P 2>/dev/null)"
   if [ "$jobDone" != "" ]; then
     clearCPU $jobDone
   fi
