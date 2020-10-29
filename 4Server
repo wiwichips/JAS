@@ -121,6 +121,7 @@ done
 trap cleanup 0 1 2 15 SIGINT
 
 while [ "$isOn" = '1' ]; do
+  sleep 0.3 # 😏
   # read user input from the submit pipe
   submit="$(python3 fifoReader.py $FIFO_S 2>/dev/null)"
   if [ "$submit" = 'exit' ]; then
