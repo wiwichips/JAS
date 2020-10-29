@@ -62,15 +62,16 @@ $ ./runtests 2
 This test checks for garbage handling, executing a normal command, status and shutdown. This test is a success if the status says the program system doesn't crash with garbage input, displays 2 jobs have completed and the server closes with -x and properly cleans up the pipes.
 
 ##### Test Case 3
-Run a the server in one terminal with the command:
-```sh
-$ ./mgServer
-```
-Run the testing script in another terminal using the command:
 ```sh
 $ ./runtests 3
 ```
 This test checks if the server can properly maintain a job queue with jobs that take a certain amount of time to complete. This test is a a success if the first status shows 8 processors are busy and the second status says 12 jobs have completed.
+
+##### Test Case 4
+```sh
+$ ./runtests 4
+```
+This test checks if each processor can handle globbing. ls mg* is sent to the server. If the log file contains only files that start with mg (mgSubmit, mgServer, and mgProcess), the test is a success.
 
 ## Works Cited
 The timedCountdown script was not created by me. It was provided by Andrew Hamilton-Wright for use in this assignment testing.

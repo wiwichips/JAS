@@ -111,6 +111,24 @@ function test3 {
   echo -e "TEST3:\tTest passed if the status displays 12 jobs have been completed and all jobs are idle"
 }
 
+function test4 {
+  cleanLogs
+
+  ./mgServer &
+
+  sleep 0.1
+
+  ./mgSubmit "ls mg*"
+
+  ./mgSubmit -x
+
+  sleep 1
+
+  echo -e "\n\n\nTEST4:\tPRINTING cat OF PROCESSOR 1 LOG WITH COMMAND ls mg*\n"
+  head '/tmp/processor-will.1.log'
+  echo -e "\n\n\nTEST4:\tTest passes if only files starting with mg are listed."
+}
+
 function printHelp {
   echo -e "./runTests:\tThanks for running my tests!"
   echo -e "./runTests:\tPlease re-run this program with the specified test"
@@ -125,6 +143,8 @@ elif [ "$testNum" = '2' ]; then
   test2
 elif [ "$testNum" = '3' ]; then
   test3
+elif [ "$testNum" = '4' ]; then
+  test4
 elif [ "$testNum" = 'all' ]; then
   echo -e "\n./runTests:\t~~~~~~~~~~~~~~"
   echo -e "./runTests:\tRunning test 1"
@@ -142,6 +162,12 @@ elif [ "$testNum" = 'all' ]; then
   echo -e "./runTests:\t~~~~~~~~~~~~~~\n"
   sleep 0.7
   test3
+  sleep 0.7
+  echo -e "\n./runTests:\t~~~~~~~~~~~~~~"
+  echo -e "./runTests:\tRunning test 4"
+  echo -e "./runTests:\t~~~~~~~~~~~~~~\n"
+  sleep 0.7
+  test4
   sleep 0.3
   echo -e "\n./runTests:\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   echo -e "./runTests:\tIf there were any problems, please try running each test individually."
