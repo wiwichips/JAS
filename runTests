@@ -75,33 +75,33 @@ function test3 {
 
   echo -e "TEST3:\tWaiting three seconds before checking the server status"
   echo -e "TEST3:\t____________"
-  sleep 0.25
+  sleep 0.28
   printf 'TEST3:\t#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#'
-  sleep 0.25
+  sleep 0.28
   printf '#\n'
 
   echo -e "TEST3:\tPrinting Status"
-  sleep 0.2
+  sleep 0.3
   ./mgSubmit -s
 
   ./mgSubmit -x
@@ -140,7 +140,7 @@ function printHelp {
 if [ "$testNum" = '1' ]; then
   test1
 elif [ "$testNum" = '2' ]; then
-  test2
+  test2cl
 elif [ "$testNum" = '3' ]; then
   test3
 elif [ "$testNum" = '4' ]; then
@@ -173,6 +173,7 @@ elif [ "$testNum" = 'all' ]; then
   echo -e "./runTests:\tIf there were any problems, please try running each test individually."
   echo -e "./runTests:\tRun tests on their own by typing ./runTests 1 for example."
   echo -e "./runTests:\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo -e "./runTests:\t~~~~~~~~~~~~~~~~~~~~~~~~~~~ALL TESTS PASSED~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 elif [ "$testNum" = '' ]; then
   printHelp
 else
