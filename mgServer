@@ -9,6 +9,9 @@ FIFOS=()
 numCPU="$(getconf _NPROCESSORS_ONLN)"
 idle=()
 
+# server directory
+DIRECTORY="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # job queue
 jobQueue=()
 numJobs=0
@@ -113,8 +116,7 @@ for i in $(seq $numCPU); do
   # create a new fifo
   FIFOS[$i]="$FIFO_P$i"
   mkfifo ${FIFO_P}-cpuID${i}
-
-  ./mgProcessor $i $$ &
+  "$DIRECTORY/mgProcessor" $i $$ &
 done
 
 # traps
@@ -123,7 +125,7 @@ trap cleanup 0 1 2 15 SIGINT
 while [ "$isOn" = '1' ]; do
   sleep 0.3 # 😏
   # read user input from the submit pipe
-  submit="$(python3 fifoReader.py $FIFO_S 2>/dev/null)"
+  submit="$(python3 $DIRECTORY/fifoReader.py $FIFO_S 2>/dev/null)"
   if [ "$submit" = 'exit' ]; then
     exit 0
     break
@@ -136,7 +138,7 @@ while [ "$isOn" = '1' ]; do
   fi
 
   # read from the done jobs queue
-  jobDone="$(python3 fifoReader.py $FIFO_P 2>/dev/null)"
+  jobDone="$(python3 $DIRECTORY/fifoReader.py $FIFO_P 2>/dev/null)"
   if [ "$jobDone" != "" ]; then
     clearCPU $jobDone
   fi

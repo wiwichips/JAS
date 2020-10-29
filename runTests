@@ -4,7 +4,7 @@ testNum=$1
 shopt -s dotglob
 
 function cleanLogs {
-  rm -f /tmp/processor-will.*
+  rm -f /tmp/processor-${USER}.*
 }
 
 function test1 {
@@ -25,9 +25,9 @@ function test1 {
   sleep 1
 
   echo -e "\n\n\nTEST1:\tPRINTING HEAD OF PROCESSOR 1 LOG WITH COMMAND ps\n"
-  head '/tmp/processor-will.1.log'
+  head '/tmp/processor-${USER}.1.log'
   echo -e "\n\n\nTEST1:\tPRINTING HEAD OF PROCESSOR 2 LOG WITH COMMAND ps -s\n"
-  head '/tmp/processor-will.2.log'
+  head '/tmp/processor-${USER}.2.log'
   echo -e "\n\n\nTEST1:\tTest passes if the two outputs are in a different format."
 }
 
@@ -125,7 +125,7 @@ function test4 {
   sleep 1
 
   echo -e "\n\n\nTEST4:\tPRINTING cat OF PROCESSOR 1 LOG WITH COMMAND ls mg*\n"
-  head '/tmp/processor-will.1.log'
+  head '/tmp/processor-${USER}.1.log'
   echo -e "\n\n\nTEST4:\tTest passes if only files starting with mg are listed."
 }
 
