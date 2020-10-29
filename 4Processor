@@ -8,6 +8,8 @@ server=$2
 FIFO_P="/tmp/processor-${USER}-fifo-cpuID${cpuID}"
 FIFO_DONE="/tmp/processor-${USER}-fifo"
 
+shopt -s dotglob
+
 function doJob {
   # execute the job
   $@ >> "/tmp/processor-$USER.${cpuID}.log"
