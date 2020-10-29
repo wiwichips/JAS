@@ -1,0 +1,155 @@
+#!/bin/bash
+testNum=$1
+
+shopt -s dotglob
+
+function cleanLogs {
+  rm -f /tmp/processor-will.*
+}
+
+function test1 {
+  cleanLogs
+
+  ./mgServer &
+
+  sleep 0.1
+
+  ./mgSubmit ps
+
+  ./mgSubmit sleep 1
+
+  ./mgSubmit "ps -s"
+
+  ./mgSubmit -x
+
+  sleep 1
+
+  echo -e "\n\n\nTEST1:\tPRINTING HEAD OF PROCESSOR 1 LOG WITH COMMAND ps\n"
+  head '/tmp/processor-will.1.log'
+  echo -e "\n\n\nTEST1:\tPRINTING HEAD OF PROCESSOR 2 LOG WITH COMMAND ps -s\n"
+  head '/tmp/processor-will.2.log'
+  echo -e "\n\n\nTEST1:\tTest passes if the two outputs are in a different format."
+}
+
+function test2 {
+  cleanLogs
+
+  ./mgServer &
+
+  sleep 0.1
+
+  ./mgSubmit "khsflkhasdlkjhfsukdhfoiweuhroiuwhreoiuwqheoiruhwqr riuewq"
+
+  ./mgSubmit ls
+
+  sleep 1
+
+  ./mgSubmit -s
+
+  ./mgSubmit -x
+
+  sleep 0.55
+
+  echo -e "TEST2:\tTest passes if Status above should say 2 jobs have been completed and program exits"
+  echo -e "TEST2:\tCheck the /tmp/ directory to ensure the fifps have properly closed for the current user"
+
+}
+
+function test3 {
+  ./mgServer &
+
+  sleep 0.1
+
+  ./mgSubmit ./timedCountdown 2 # 1
+  ./mgSubmit ./timedCountdown 2 # 2
+  ./mgSubmit ./timedCountdown 2 # 3
+  ./mgSubmit ./timedCountdown 2 # 4
+  ./mgSubmit ./timedCountdown 2 # 5
+  ./mgSubmit ./timedCountdown 2 # 6
+  ./mgSubmit ./timedCountdown 2 # 7
+  ./mgSubmit ./timedCountdown 2 # 8
+  ./mgSubmit ./timedCountdown 2 # 9
+  ./mgSubmit ./timedCountdown 2 # 10
+  ./mgSubmit ./timedCountdown 2 # 11
+  ./mgSubmit ./timedCountdown 2 # 12
+
+  echo -e "TEST3:\tWaiting three seconds before checking the server status"
+  echo -e "TEST3:\t____________"
+  sleep 0.25
+  printf 'TEST3:\t#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#'
+  sleep 0.25
+  printf '#\n'
+
+  echo -e "TEST3:\tPrinting Status"
+  sleep 0.2
+  ./mgSubmit -s
+
+  ./mgSubmit -x
+
+  sleep 0.55
+
+  echo -e "TEST3:\tTest passed if the status displays 12 jobs have been completed and all jobs are idle"
+}
+
+function printHelp {
+  echo -e "./runTests:\tThanks for running my tests!"
+  echo -e "./runTests:\tPlease re-run this program with the specified test"
+  echo -e "./runTests:\tOptions include (./runTests 1, ./runTests2, ./runTests3)"
+  echo -e "./runTests:\tIf you want to run all the tests, use ./runTests all"
+  echo -e "./runTests:\tThank you!"
+}
+
+if [ "$testNum" = '1' ]; then
+  test1
+elif [ "$testNum" = '2' ]; then
+  test2
+elif [ "$testNum" = '3' ]; then
+  test3
+elif [ "$testNum" = 'all' ]; then
+  echo -e "\n./runTests:\t~~~~~~~~~~~~~~"
+  echo -e "./runTests:\tRunning test 1"
+  echo -e "./runTests:\t~~~~~~~~~~~~~~\n"
+  test1
+  sleep 0.7
+  echo -e "\n./runTests:\t~~~~~~~~~~~~~~"
+  echo -e "./runTests:\tRunning test 2"
+  echo -e "./runTests:\t~~~~~~~~~~~~~~\n"
+  sleep 0.7
+  test2
+  sleep 0.7
+  echo -e "\n./runTests:\t~~~~~~~~~~~~~~"
+  echo -e "./runTests:\tRunning test 3"
+  echo -e "./runTests:\t~~~~~~~~~~~~~~\n"
+  sleep 0.7
+  test3
+  sleep 0.3
+  echo -e "\n./runTests:\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo -e "./runTests:\tIf there were any problems, please try running each test individually."
+  echo -e "./runTests:\tRun tests on their own by typing ./runTests 1 for example."
+  echo -e "./runTests:\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+elif [ "$testNum" = '' ]; then
+  printHelp
+else
+  echo -e "./runTests:\t$testNum is not recognized\n"
+  printHelp
+fi

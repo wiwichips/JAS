@@ -1,0 +1,17 @@
+#!/bin/bash
+
+numCPU="$(getconf _NPROCESSORS_ONLN)"
+
+# 32 timedCountdown test
+./mgSubmit ./timedCountdown # 1
+./mgSubmit ./timedCountdown # 2
+./mgSubmit ./timedCountdown # 3
+./mgSubmit ./timedCountdown # 4
+./mgSubmit ./timedCountdown # 5
+./mgSubmit ./timedCountdown # 6
+./mgSubmit ./timedCountdown # 7
+./mgSubmit ./timedCountdown # 8
+./mgSubmit ./timedCountdown # 9
+./mgSubmit ./timedCountdown # 10
+./mgSubmit ./timedCountdown # 11
+./mgSubmit ./timedCountdown # 12

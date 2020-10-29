@@ -56,11 +56,6 @@ $ ./runtests 1
 This test checks if multiple arguments are properly sent to each processor by running the command ps -s and ps. The output of the logs for the first two processors will be shown after running the commands, if they are different, the test has passed.
 
 ##### Test Case 2
-Run a the server in one terminal with the command:
-```sh
-$ ./mgServer
-```
-Run the testing script in another terminal using the command:
 ```sh
 $ ./runtests 2
 ```
@@ -77,3 +72,5 @@ $ ./runtests 3
 ```
 This test checks if the server can properly maintain a job queue with jobs that take a certain amount of time to complete. This test is a a success if the first status shows 8 processors are busy and the second status says 12 jobs have completed.
 
+## Works Cited
+The timedCountdown script was not created by me. It was provided by Andrew Hamilton-Wright for use in this assignment testing.
